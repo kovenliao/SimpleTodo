@@ -1,7 +1,9 @@
 package yahoo.simpletodo;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,10 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    final private static String TAG = "MAIN";
+
+    final public static Integer REQUEST_CODE = 200;
 
     private ListView lvItems;
 
@@ -85,6 +91,31 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
         );
+
+        lvItems.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
+                        intent.putExtra("itemIndex", position);
+                        intent.putExtra("itemText", items.get(position));
+                        startActivityForResult(intent, REQUEST_CODE);
+                    }
+                }
+        );
+    }
+
+    protected void onActivityResult(int requectCode, int resultCode, Intent data) {
+//        Log.d(TAG, "onActivityResult...");
+        if (resultCode == RESULT_OK && requectCode == REQUEST_CODE) {
+            String updatedText = data.getStringExtra("updatedText");
+            int index  = data.getIntExtra("itemIndex", -1);
+//            Log.d(TAG, "onActivityResult..." + updatedText);
+//            Log.d(TAG, "onActivityResult..." + index);
+            items.set(index, updatedText);
+            writeItems();
+            itemsAdapter.notifyDataSetChanged();
+        }
     }
 
     private void readItems() {
